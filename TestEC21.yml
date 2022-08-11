@@ -64,7 +64,6 @@ Resources:
   rEC2Instance1: 
     Type: AWS::EC2::Instance
     Properties: 
-      InstanceName: "testec2"
       ImageId: "ami-090fa75af13c156b4"
       KeyName: "SureshKEY"
       InstanceType: "t2.nano"
