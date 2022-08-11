@@ -64,7 +64,7 @@ Resources:
   rEC2Instance1: 
     Type: AWS::EC2::Instance
     Properties: 
-      ImageId: "ami-090fa75af13c156b4"
+      ImageId: "ami-0e34bbddc66def5ac"
       InstanceType: "t2.nano"
       AvailabilityZone: "eu-west-2a"
       SecurityGroupIds:
