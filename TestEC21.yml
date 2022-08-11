@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  pKeyName:
+    Type: String   
+  pInstanceName:
+    Type: String
+  pAMIId:
+    Type: String
+  pInstanceType:
+    Type: String
+    AllowedValues:
+      - t2.micro
+      - t2.nano
+    Default: t2.micro
+  pKeyPair: 
+    Description: Amazon EC2 Key Pair
+    Type: "AWS::EC2::KeyPair::KeyName"  
+
+
+Resources:   
+  
+  rNewVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: rNewVPC
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref rNewVPC
+      InternetGatewayId: !Ref InternetGateway
+  SubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-west-2a
+      VpcId: !Ref rNewVPC
+      CidrBlock: 10.0.0.0/24
+      MapPublicIpOnLaunch: true
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref rNewVPC
+  InternetRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGateway
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref RouteTable
+  SubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref SubnetA
+
+  rInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: "Test SecurityGroup"
+      GroupDescription: Allow http to client host
+      VpcId: !Ref rNewVPC
+      SecurityGroupIngress:
+       - IpProtocol: tcp
+         FromPort: 80
+         ToPort: 80
+         CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+       - IpProtocol: tcp
+         FromPort: 80
+         ToPort: 80
+         CidrIp: 0.0.0.0/0
+         
+  rEC2Instance1: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: !Ref pAMIId
+      KeyName: !Ref pKeyPair
+      InstanceType: "t2.nano"
+      AvailabilityZone: "eu-west-2a"
+      SecurityGroupIds:
+        - !GetAtt "rInstanceSecurityGroup.GroupId"
+      SubnetId: !Ref SubnetA
+      Tags:
+        - Key: "Name"
+          Value: !Ref pInstanceName
+        - Key: "Type"
+          Value: !Ref pKeyName
+  
+
+Outputs:
+  InstanceID:
+    Description: The Instance ID
+    Value: !Ref rEC2Instance1         
