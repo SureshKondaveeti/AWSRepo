@@ -65,15 +65,9 @@ Resources:
     Type: AWS::EC2::Instance
     Properties: 
       ImageId: "ami-090fa75af13c156b4"
-      KeyName: "SureshKEY"
       InstanceType: "t2.nano"
       AvailabilityZone: "eu-west-2a"
       SecurityGroupIds:
         - !GetAtt "rInstanceSecurityGroup.GroupId"
       SubnetId: !Ref SubnetA
-   
-
-Outputs:
-  InstanceID:
-    Description: The Instance ID
-    Value: !Ref rEC2Instance1         
+           
